@@ -8,8 +8,9 @@ case $1 in
 		echo "Starting $RUNNERS scannable containers";
 		while [ $COUNT -lt $RUNNERS ]; do
 			docker run -d --rm --name scannable-$COUNT  scannable 
+			sleep 3
 			if [ $? -eq 0 ]; then
-			        IPS="$IPS $(docker logs scannable-$COUNT | awk /inet/'{print $2}'  | grep -v 127.0.0.1)"
+			        IPS="$IPS $COUNT:$(docker logs scannable-$COUNT | awk /inet/'{print $2}'  | grep -v 127.0.0.1)"
 				COUNT=$( expr $COUNT + 1 )
 				
 			else
@@ -19,7 +20,7 @@ case $1 in
 		done
 		docker ps 
 		echo "Container IPs"
-		echo $IPS
+		echo $IPS | sed -e "s/.://g;s/\/16//g"
 	;;
 	stop)
 		echo "Stopping all scannable containers."
